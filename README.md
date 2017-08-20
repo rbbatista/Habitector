@@ -39,7 +39,7 @@ mvn install
 
 Alternatively, import Habitector as a Maven project in Eclipse and click on Run as --> Maven install.
 
-A JAR file with dependencies should be created by the above step. 
+The above step should generate a JAR file with dependencies inside a folder named *target*.
 
 ## Usage in conjunction with NERsuite
 

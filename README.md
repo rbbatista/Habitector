@@ -90,7 +90,7 @@ Train a new model using NERsuite
 
 ```
 cd nersuite
-./nersuite learn -f labelled_dictionary_tagged_corpus -f model_file
+./nersuite learn -f labelled_dictionary_tagged_corpus -m model_file
 ```
 where:
     *labelled_dictionary_tagged_corpus* is the output of the previous step;
@@ -120,10 +120,10 @@ where:
 	*tokenised_output* is the path to the tokenised output from the previous step;
     *dictionary_tagged_corpus* is a path to which a dictionary-tagged version of tokenised_output will be saved
     
-If toggle_for_creating_separate_files was set to true in the previous step, this should be done as part of a loop (where test_data_folder contains the separate/multiple test files)
+If *toggle_for_creating_separate_files* was set to true in the previous step, this should be done as part of a loop (where *test_data_folder* contains the separate/multiple test files)
 
 ```
-for i in test_data_folder/*.*; ./nersuite_dic_tagger -n cns compiled_dictionary < $i > dictionary_tagged_test_data_folder/$i; done;
+for i in test_data_folder/*.*; do ./nersuite_dic_tagger -n cns compiled_dictionary < $i > dictionary_tagged_test_data_folder/$i; done;
 ```
 
 ### Applying models on test data
@@ -138,7 +138,7 @@ where:
     *dictionary_tagged_test_data* is the path to the dictionary-tagged tokenised test data;
     *ner_result_file* is a path to which predictions of the model on the test data will be written 
 
-If toggle_for_creating_separate_files was set to true in the previous steps, the above command should be run as part of a loop (where test_data_folder contains the separate/multiple test files):
+If *toggle_for_creating_separate_files* was set to true in the previous steps, the above command should be run as part of a loop (where *test_data_folder* contains the separate/multiple test files):
 
 ```
 for i in dictionary_tagged_test_data_folder/*.*; do ./nersuite tag -m model_file < $i > ner_result_folder/$i; done;

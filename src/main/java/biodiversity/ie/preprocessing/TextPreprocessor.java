@@ -1,6 +1,9 @@
 package biodiversity.ie.preprocessing;
 
 import java.io.StringReader;
+import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.jmcejuela.bio.jenia.JeniaTagger;
 
@@ -63,16 +66,37 @@ public class TextPreprocessor {
 			PTBTokenizer<CoreLabel> ptbt = new PTBTokenizer<>(new StringReader(sentence.getText()), new CoreLabelTokenFactory(), "normalizeSpace=true,normalizeFractions=false,unicodeEllipsis=true,splitHyphenated=true,ptb3Escaping=false,untokenizable=noneKeep");
 
 			while (ptbt.hasNext()) {
-				biodiversity.ie.types.Token token = new biodiversity.ie.types.Token();
 				CoreLabel label = ptbt.next();
-
-				token.setBegin(label.beginPosition());
-				token.setEnd(label.endPosition());
-				token.setSurfaceForm(label.originalText());
-				sentence.addToken(token);
-				geniaInputText = geniaInputText + token.getSurfaceForm() + " ";
-				//System.out.println(label);
+				boolean isProblematic = isProblematicColon(label.originalText());
+				if (!isProblematic) {
+					biodiversity.ie.types.Token token = new biodiversity.ie.types.Token();
+					token.setBegin(label.beginPosition());
+					token.setEnd(label.endPosition());
+					token.setSurfaceForm(label.originalText());
+					sentence.addToken(token);
+					geniaInputText = geniaInputText + token.getSurfaceForm() + " ";
+					//System.out.println(label.beginPosition() + "\t" + label.endPosition() + "\t" + label.originalText());
+				}
+				else {
+					StringTokenizer tokenizer = new StringTokenizer(label.originalText(), ":", true);
+					int adjustedBegin = label.beginPosition();
+					
+					while (tokenizer.hasMoreTokens()) {
+						String nextToken = tokenizer.nextToken();
+						int adjustedEnd = adjustedBegin + nextToken.length();
+						biodiversity.ie.types.Token token = new biodiversity.ie.types.Token();
+						token.setBegin(adjustedBegin);
+						token.setEnd(adjustedEnd);
+						token.setSurfaceForm(nextToken);
+						sentence.addToken(token);
+						geniaInputText = geniaInputText + token.getSurfaceForm() + " ";
+						//System.out.println(adjustedBegin + "\t" + adjustedEnd + "\t" + nextToken);
+						adjustedBegin = adjustedEnd;
+					}
+				}
+				
 			}
+			
 			sentence.setGeniaInputText(geniaInputText);
 		}
 	}
@@ -101,5 +125,16 @@ public class TextPreprocessor {
 
 		}
 
+	}
+	
+	public static boolean isProblematicColon(String tokenText) {
+		boolean isProblematic = false;
+		String regex =   ":[0-9]+";
+		Pattern p = Pattern.compile(regex);
+		Matcher matcher = p.matcher(tokenText);
+		if (matcher.find()) {
+			isProblematic = true;
+		}
+		return isProblematic;
 	}
 }
